@@ -9,25 +9,24 @@ local UserInputService = game:GetService("UserInputService")
 
 -- Define the invisible variable
 local invisible = false
+local sheriffAimbot = false
 
 -- Function to toggle invisibility
 local function toggleInvisibility(character)
     if invisible then
-        -- Make character visible to all players
-        for _, child in ipairs(character:GetChildren()) do
-            if child:IsA("BasePart") then
-                child.Transparency = 0
-            end
-        end
-        invisible = false
-    else
         -- Make character invisible to all players
         for _, child in ipairs(character:GetChildren()) do
             if child:IsA("BasePart") then
                 child.Transparency = 1
             end
         end
-        invisible = true
+    else
+        -- Make character visible to all players
+        for _, child in ipairs(character:GetChildren()) do
+            if child:IsA("BasePart") then
+                child.Transparency = 0
+            end
+        end
     end
 end
 
@@ -38,6 +37,48 @@ module[1] = {
         toggleInvisibility(Self)
     end}
 }
+
+-- Module definition
+module[1] = {
+       Type = "Button",
+       Args = {"Shoot Murderer V2", function(Self)
+			if findSheriff() ~= localplayer then 
+				fu.notification("You're not sheriff/hero.") 
+				return 
+			end
+	
+			local murderer = findMurderer()
+			if not murderer then
+				fu.notification("No murderer to shoot.")
+				return
+			end
+	
+			if not localplayer.Character:FindFirstChild("Gun") then
+				local hum = localplayer.Character:FindFirstChild("Humanoid")
+				if localplayer.Backpack:FindFirstChild("Gun") then
+					hum:EquipTool(localplayer.Backpack:FindFirstChild("Gun"))
+				else
+					fu.notification("You don't have the gun..?")
+					return
+				end
+			end
+	
+			local murdererHRP = murderer.Character:FindFirstChild("HumanoidRootPart")
+			if not murdererHRP then
+				fu.notification("Could not find the murderer's HumanoidRootPart.")
+				return
+			end
+			
+			local predictedPosition = getPredictedPosition(murderer, shootOffset)
+	
+			local args = {
+				[1] = 1,
+				[2] = predictedPosition,
+				[3] = "AH"
+			}
+			localplayer.Character.Gun.KnifeServer.ShootGun:InvokeServer(unpack(args))
+		end}
+	}
 
 _G.Modules = _G.Modules or {}
 _G.Modules[#_G.Modules + 1] = module
