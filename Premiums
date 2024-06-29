@@ -37,9 +37,10 @@ module[1] = {
     end}
 }
 
+-- Module definition
 module[2] = {
     Type = "Button",
-    Args = {"[Good For A Tool] Hold Everyone", function(Self)
+    Args = {"[Good For a tool] Hold Everyone Hostages", function(Self)
         local localplayer = game.Players.LocalPlayer
         local localTeam = localplayer.Team
         
@@ -58,7 +59,7 @@ module[2] = {
             fu.notification("Placed all players not on your team in a single point. Kill everyone at once once you decide to.")
         end
     end}
-})
+}
 
 _G.Modules = _G.Modules or {}
 _G.Modules[#_G.Modules + 1] = module
