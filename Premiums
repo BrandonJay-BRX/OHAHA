@@ -1,6 +1,6 @@
 local module = {}
 
-module["Name"] = "Invisible Mod Script"
+module["Name"] = "Ultimate Script"
 
 -- Services
 local Players = game:GetService("Players")
@@ -9,7 +9,6 @@ local UserInputService = game:GetService("UserInputService")
 
 -- Define the invisible variable
 local invisible = false
-local sheriffAimbot = false
 
 -- Function to toggle invisibility
 local function toggleInvisibility(character)
@@ -39,44 +38,13 @@ module[1] = {
 }
 
 -- Module definition
-module[1] = {
+module[2] = {
        Type = "Button",
-       Args = {"Shoot Murderer V2", function(Self)
-			if findSheriff() ~= localplayer then 
-				fu.notification("You're not sheriff/hero.") 
+       Args = {"TEST", function(Self)
+			if test then 
+				fu.notification("Testing") 
 				return 
 			end
-	
-			local murderer = findMurderer()
-			if not murderer then
-				fu.notification("No murderer to shoot.")
-				return
-			end
-	
-			if not localplayer.Character:FindFirstChild("Gun") then
-				local hum = localplayer.Character:FindFirstChild("Humanoid")
-				if localplayer.Backpack:FindFirstChild("Gun") then
-					hum:EquipTool(localplayer.Backpack:FindFirstChild("Gun"))
-				else
-					fu.notification("You don't have the gun..?")
-					return
-				end
-			end
-	
-			local murdererHRP = murderer.Character:FindFirstChild("HumanoidRootPart")
-			if not murdererHRP then
-				fu.notification("Could not find the murderer's HumanoidRootPart.")
-				return
-			end
-			
-			local predictedPosition = getPredictedPosition(murderer, shootOffset)
-	
-			local args = {
-				[1] = 1,
-				[2] = predictedPosition,
-				[3] = "AH"
-			}
-			localplayer.Character.Gun.KnifeServer.ShootGun:InvokeServer(unpack(args))
 		end}
 	}
 
