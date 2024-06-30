@@ -7,7 +7,7 @@ local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
 -- Password for access
-local password = "your_password_here"  -- Replace with your desired password
+local password = "BT"  -- Replace with your desired password
 
 -- Variable to track if password was entered correctly
 local passwordEntered = false
