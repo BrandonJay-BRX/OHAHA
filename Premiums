@@ -7,68 +7,36 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
--- Variables for X-ray effect
-local XRAY_TRANSPARENCY = 0.7 -- Transparency value for X-ray effect
-local XRAY_COLOR = Color3.fromRGB(0, 191, 255) -- Blue tint color for X-ray effect
+-- Variable to store the state of the X-ray (on/off)
+local xrayState = false
 
--- Variable to track X-ray state
-local Xrays = false
-
--- Define the X-ray function
+-- Function to toggle the X-ray effect
 local function toggleXray(state)
-    -- Find all parts that should be affected by the X-ray effect
-    for _, part in pairs(workspace:GetDescendants()) do
-        if part:IsA("BasePart") and not part:IsDescendantOf(game.Players.LocalPlayer.Character) then
-            if state then
-                -- Store original properties
-                part:SetAttribute("OriginalTransparency", part.Transparency)
-                part:SetAttribute("OriginalColor", part.Color)
-                -- Set transparency and color to simulate X-ray effect
-                part.Transparency = XRAY_TRANSPARENCY
-                part.Color = XRAY_COLOR
-            else
-                -- Restore original properties
-                local originalTransparency = part:GetAttribute("OriginalTransparency")
-                local originalColor = part:GetAttribute("OriginalColor")
-                if originalTransparency ~= nil then
-                    part.Transparency = originalTransparency
-                end
-                if originalColor ~= nil then
-                    part.Color = originalColor
-                end
+    if state then
+        -- Enable X-ray (make map parts transparent and white)
+        for _, part in ipairs(workspace:GetDescendants()) do
+            if part:IsA("BasePart") and not part:IsDescendantOf(game.Players) and not part:IsDescendantOf(game.Lighting) then
+                part.Transparency = 0.5  -- Adjust transparency as needed
+                part.Color = Color3.fromRGB(255, 255, 255)  -- Make the part a little white
+            end
+        end
+    else
+        -- Disable X-ray (restore original transparency and color)
+        for _, part in ipairs(workspace:GetDescendants()) do
+            if part:IsA("BasePart") and not part:IsDescendantOf(game.Players) and not part:IsDescendantOf(game.Lighting) then
+                part.Transparency = 0  -- Restore original transparency
+                part.Color = Color3.new(1, 1, 1)  -- Restore original color (assuming white was the original color)
             end
         end
     end
 end
 
--- Define the toggle function
-local function toggleXrayEffect()
-    Xrays = not Xrays
-    toggleXray(Xrays)
-
-    -- If X-ray is enabled, set a timer to disable it after XRAY_DURATION seconds
-    if Xrays then
-        delay(XRAY_DURATION, function()
-            if Xrays then
-                Xrays = false
-                toggleXray(false)
-            end
-        end)
-    end
-end
-
--- Handle the toggle functionality
+-- Module definition
 module[1] = {
     Type = "Toggle",
-    Args = {"X-ray [Last Only 5s]", function(Self)
-        if Xrays then
-            -- Turn off immediately
-            Xrays = false
-            toggleXray(false)
-        else
-            -- Turn on and start the duration timer
-            toggleXrayEffect()
-        end
+    Args = {"X-ray [BETA]", function(Self, state)
+        xrayState = state
+        toggleXray(xrayState)
     end}
 }
 
