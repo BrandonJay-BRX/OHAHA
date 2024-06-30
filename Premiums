@@ -16,13 +16,14 @@ local XRAY_COLOR = Color3.fromRGB(0, 191, 255) -- Blue tint color for X-ray effe
 -- Passwords management
 local passwords = {
     "Brandon23", -- Example password
-    "XD",      -- Example password
+    "XD",        -- Example password
     "F0llow"     -- Example password
 }
 local passwordEntered = false -- Track if any valid password has been entered
 
 -- Variable to control avoiding player with knife
 local AvoidKnifePlayer = false
+local AvoidKnifePlayerEnabled = false -- Track if automatic avoidance is enabled
 
 -- Function to toggle the X-ray effect
 local function toggleXray(state)
@@ -105,6 +106,16 @@ local function teleportPlayerTo(targetPosition)
     end
 end
 
+-- Function to periodically check for a player to avoid
+local function checkPlayerToAvoid()
+    if AvoidKnifePlayerEnabled then
+        local targetPlayer = findFarthestPlayerWithoutKnifeAndGun()
+        if targetPlayer then
+            teleportPlayerTo(targetPlayer.Character.HumanoidRootPart.Position)
+        end
+    end
+end
+
 -- Module 1: X-ray Toggle with Password Protection
 module[1] = {
     Type = "Toggle",
@@ -181,16 +192,17 @@ module[4] = {
     Type = "Toggle",
     Args = {"Automatically Avoid a Player with a Knife", function(Self)
         if passwordEntered then
-            local state = not AvoidKnifePlayer -- Toggle state
-            AvoidKnifePlayer = state
+            AvoidKnifePlayerEnabled = not AvoidKnifePlayerEnabled -- Toggle state
             
-            if state then
-                local targetPlayer = findFarthestPlayerWithoutKnifeAndGun()
-                if targetPlayer then
-                    teleportPlayerTo(targetPlayer.Character.HumanoidRootPart.Position)
-                else
-                    print("No suitable player found to avoid.")
-                end
+            if AvoidKnifePlayerEnabled then
+                checkPlayerToAvoid() -- Check immediately when turned on
+                -- Schedule periodic checks every 2 seconds
+                RunService.Heartbeat:Connect(function(step)
+                    if step >= 2 then
+                        checkPlayerToAvoid()
+                        step = 0
+                    end
+                end)
             end
         else
             print("Please enter a valid password.")
