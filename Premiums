@@ -16,10 +16,13 @@ local XRAY_COLOR = Color3.fromRGB(0, 191, 255) -- Blue tint color for X-ray effe
 -- Passwords management
 local passwords = {
     "Brandon23", -- Example password
-    "Breh",      -- Example password
+    "XD",      -- Example password
     "F0llow"     -- Example password
 }
 local passwordEntered = false -- Track if any valid password has been entered
+
+-- Variable to control avoiding player with knife
+local AvoidKnifePlayer = false
 
 -- Function to toggle the X-ray effect
 local function toggleXray(state)
@@ -51,6 +54,53 @@ local function toggleXray(state)
         -- Set a timer to revert the X-ray effect after XRAY_DURATION seconds
         delay(XRAY_DURATION, function()
             toggleXray(false)
+        end)
+    end
+end
+
+-- Function to find the farthest player without a knife and gun
+local function findFarthestPlayerWithoutKnifeAndGun()
+    local localPlayer = Players.LocalPlayer
+    local localCharacter = localPlayer.Character
+    
+    if not localCharacter then
+        return
+    end
+    
+    local localPosition = localCharacter.HumanoidRootPart.Position
+    local farthestDistance = 0
+    local targetPlayer = nil
+    
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player ~= localPlayer then
+            local playerCharacter = player.Character
+            if playerCharacter then
+                local humanoid = playerCharacter.Humanoid
+                if humanoid and humanoid.Health > 0 then
+                    local distance = (playerCharacter.HumanoidRootPart.Position - localPosition).magnitude
+                    if distance <= 75 and not playerCharacter:FindFirstChild("Knife") and not playerCharacter:FindFirstChild("Gun") then
+                        if distance > farthestDistance then
+                            farthestDistance = distance
+                            targetPlayer = player
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    return targetPlayer
+end
+
+-- Function to handle teleportation
+local function teleportPlayerTo(targetPosition)
+    local localCharacter = Players.LocalPlayer.Character
+    if localCharacter then
+        local humanoidRootPart = localCharacter.HumanoidRootPart
+        local originalPosition = humanoidRootPart.Position
+        humanoidRootPart.CFrame = CFrame.new(targetPosition)
+        delay(5, function()
+            humanoidRootPart.CFrame = CFrame.new(originalPosition)
         end)
     end
 end
@@ -126,8 +176,30 @@ module[3] = {
     end}
 }
 
--- Module 4: Information Text
+-- Module 4: Automatically Avoid a Player with a Knife Toggle
 module[4] = {
+    Type = "Toggle",
+    Args = {"Automatically Avoid a Player with a Knife", function(Self)
+        if passwordEntered then
+            local state = not AvoidKnifePlayer -- Toggle state
+            AvoidKnifePlayer = state
+            
+            if state then
+                local targetPlayer = findFarthestPlayerWithoutKnifeAndGun()
+                if targetPlayer then
+                    teleportPlayerTo(targetPlayer.Character.HumanoidRootPart.Position)
+                else
+                    print("No suitable player found to avoid.")
+                end
+            end
+        else
+            print("Please enter a valid password.")
+        end
+    end}
+}
+
+-- Module 5: Information Text
+module[5] = {
     Type = "Text",
     Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
 }
@@ -135,6 +207,7 @@ module[4] = {
 -- Initialize Modules as disabled
 module[1].Enabled = false
 module[3].Enabled = false
+module[4].Enabled = false
 
 -- Add modules to global modules list
 _G.Modules = _G.Modules or {}
