@@ -14,7 +14,8 @@ local XRAY_COLOR = Color3.fromRGB(0, 191, 255) -- Blue tint color for X-ray effe
 -- Passwords and expiration management
 local passwords = {
     {value = "Brandon23", duration = 6000}, -- Example password with 60-second duration
-    {value = "FreeWas", duration = 120000}, -- Example password with 120-second duration
+    {value = "Breh", duration = 120000}, -- Example password with 120-second duration
+    {value = "F0llow", duration = 120000}, -- Example password with 120-second duration
 }
 local passwordEntered = false -- Track if any valid password has been entered
 local passwordExpireTime = 0 -- Timestamp for when the current password expires
