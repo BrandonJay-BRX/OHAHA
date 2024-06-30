@@ -6,7 +6,6 @@ module["Name"] = "Chronicles VIP"
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 
 -- Variables for X-ray effect
 local XRAY_TRANSPARENCY = 0.7 -- Transparency value for X-ray effect
@@ -195,14 +194,25 @@ module[4] = {
             AvoidKnifePlayerEnabled = not AvoidKnifePlayerEnabled -- Toggle state
             
             if AvoidKnifePlayerEnabled then
-                checkPlayerToAvoid() -- Check immediately when turned on
-                -- Schedule periodic checks every 2 seconds
-                RunService.Heartbeat:Connect(function(step)
-                    if step >= 2 then
-                        checkPlayerToAvoid()
-                        step = 0
-                    end
+                -- Immediately check for a player to avoid when turned on
+                checkPlayerToAvoid()
+                
+                -- Set up a periodic check every 2 seconds
+                local connection
+                connection = RunService.Stepped:Connect(function()
+                    checkPlayerToAvoid()
                 end)
+                
+                -- Clean up connection when toggled off
+                module[4].Cleanup = function()
+                    connection:Disconnect()
+                end
+            else
+                -- Disconnect any existing connections when turned off
+                if module[4].Cleanup then
+                    module[4].Cleanup()
+                    module[4].Cleanup = nil
+                end
             end
         else
             print("Please enter a valid password.")
