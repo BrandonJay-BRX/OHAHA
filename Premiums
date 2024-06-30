@@ -15,15 +15,15 @@ local function toggleXray(state)
     if state then
         -- Enable X-ray (make map parts transparent and white)
         for _, part in ipairs(workspace:GetDescendants()) do
-            if part:IsA("BasePart") and not part:IsDescendantOf(game.Players) and not part:IsDescendantOf(game.Lighting) then
+            if part:IsA("BasePart") and not part:IsDescendantOf(game.Players.LocalPlayer) and not part:IsDescendantOf(game.Lighting) then
                 part.Transparency = 0.5  -- Adjust transparency as needed
-                part.Color = Color3.fromRGB(255, 255, 255)  -- Make the part a little white
+                part.Color = Color3.fromRGB(255, 255, 255)  -- Make the part white
             end
         end
     else
         -- Disable X-ray (restore original transparency and color)
         for _, part in ipairs(workspace:GetDescendants()) do
-            if part:IsA("BasePart") and not part:IsDescendantOf(game.Players) and not part:IsDescendantOf(game.Lighting) then
+            if part:IsA("BasePart") and not part:IsDescendantOf(game.Players.LocalPlayer) and not part:IsDescendantOf(game.Lighting) then
                 part.Transparency = 0  -- Restore original transparency
                 part.Color = Color3.new(1, 1, 1)  -- Restore original color (assuming white was the original color)
             end
@@ -31,32 +31,63 @@ local function toggleXray(state)
     end
 end
 
--- Module definition
+-- Function to handle transparency and visibility of player characters and tools
+local function handleVisibility()
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Character then
+            local character = player.Character
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    if player == Players.LocalPlayer then
+                        part.Transparency = 0
+                    else
+                        part.Transparency = 1
+                    end
+                end
+            end
+            for _, tool in ipairs(character:GetChildren()) do
+                if tool:IsA("Tool") then
+                    tool.Handle.Transparency = 0
+                end
+            end
+        end
+    end
+end
+
+-- Function to toggle X-ray and handle visibility
+local function toggleXrayAndVisibility(state)
+    toggleXray(state)
+    handleVisibility()
+end
+
+-- Toggle function for X-ray effect
 module[1] = {
     Type = "Toggle",
     Args = {"X-ray [BETA]", function(Self, state)
         xrayState = state
-        toggleXray(xrayState)
+        toggleXrayAndVisibility(xrayState)
     end}
 }
 
--- Module definition
+-- Button function for holding everyone hostage
 module[2] = {
     Type = "Button",
     Args = {"[Good For a tool] Hold Everyone Hostages", function(Self)
-        local localplayer = game.Players.LocalPlayer
+        local localplayer = Players.LocalPlayer
         local localTeam = localplayer.Team
         
-        for _, player in ipairs(game.Players:GetPlayers()) do
+        for _, player in ipairs(Players:GetPlayers()) do
             if localTeam == nil or player.Team ~= localTeam then
-                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player ~= localplayer then
-                    player.Character:FindFirstChild("HumanoidRootPart").Anchored = true
-                    player.Character:FindFirstChild("HumanoidRootPart").CFrame = localplayer.Character:FindFirstChild("HumanoidRootPart").CFrame + localplayer.Character:FindFirstChild("HumanoidRootPart").CFrame.LookVector * 5
+                local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                if humanoidRootPart then
+                    humanoidRootPart.Anchored = true
+                    humanoidRootPart.CFrame = localplayer.Character.HumanoidRootPart.CFrame + localplayer.Character.HumanoidRootPart.CFrame.LookVector * 5
                 end
             end
         end
         
         if localTeam == nil then
+            -- Replace 'fu.notification' with your own notification function
             fu.notification("Placed all players in a single point. Kill everyone at once once you decide to.")
         else
             fu.notification("Placed all players not on your team in a single point. Kill everyone at once once you decide to.")
@@ -65,9 +96,9 @@ module[2] = {
 }
 
 module[3] = {
-		Type = "Text",
-		Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
-	}
+    Type = "Text",
+    Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
+}
 
 _G.Modules = _G.Modules or {}
 _G.Modules[#_G.Modules + 1] = module
