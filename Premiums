@@ -10,6 +10,12 @@ local UserInputService = game:GetService("UserInputService")
 -- Variable to store the state of the X-ray (on/off)
 local xrayState = false
 
+-- Password for access
+local password = "Brandon"  -- Replace with your desired password
+
+-- Variable to track if password was entered correctly
+local passwordEntered = false
+
 -- Function to toggle the X-ray effect
 local function toggleXray(state)
     if state then
@@ -69,36 +75,62 @@ module[1] = {
     end}
 }
 
--- Button function for holding everyone hostage
+-- Password input function
 module[2] = {
-    Type = "Button",
-    Args = {"[Good For a tool] Hold Everyone Hostages", function(Self)
-        local localplayer = Players.LocalPlayer
-        local localTeam = localplayer.Team
-        
-        for _, player in ipairs(Players:GetPlayers()) do
-            if localTeam == nil or player.Team ~= localTeam then
-                local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-                if humanoidRootPart then
-                    humanoidRootPart.Anchored = true
-                    humanoidRootPart.CFrame = localplayer.Character.HumanoidRootPart.CFrame + localplayer.Character.HumanoidRootPart.CFrame.LookVector * 5
-                end
-            end
-        end
-        
-        if localTeam == nil then
-            -- Replace 'fu.notification' with your own notification function
-            fu.notification("Placed all players in a single point. Kill everyone at once once you decide to.")
+    Type = "Input",
+    Args = {"Enter Password", "Submit", function(Self, text)
+        if text == password then
+            passwordEntered = true
+            -- Show Module 1 and Module 2 after correct password
+            module[1].Visible = true
+            module[2].Visible = true
         else
-            fu.notification("Placed all players not on your team in a single point. Kill everyone at once once you decide to.")
+            passwordEntered = false
+            -- Hide Module 1 and Module 2 if incorrect password
+            module[1].Visible = false
+            module[2].Visible = false
         end
     end}
 }
 
+-- Button function for holding everyone hostage
 module[3] = {
+    Type = "Button",
+    Args = {"[Good For a tool] Hold Everyone Hostages", function(Self)
+        if passwordEntered then
+            local localplayer = Players.LocalPlayer
+            local localTeam = localplayer.Team
+            
+            for _, player in ipairs(Players:GetPlayers()) do
+                if localTeam == nil or player.Team ~= localTeam then
+                    local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                    if humanoidRootPart then
+                        humanoidRootPart.Anchored = true
+                        humanoidRootPart.CFrame = localplayer.Character.HumanoidRootPart.CFrame + localplayer.Character.HumanoidRootPart.CFrame.LookVector * 5
+                    end
+                end
+            end
+            
+            if localTeam == nil then
+                -- Replace 'fu.notification' with your own notification function
+                fu.notification("Placed all players in a single point. Kill everyone at once once you decide to.")
+            else
+                fu.notification("Placed all players not on your team in a single point. Kill everyone at once once you decide to.")
+            end
+        else
+            fu.notification("Please enter the correct password first.")
+        end
+    end}
+}
+
+module[4] = {
     Type = "Text",
     Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
 }
+
+-- Initialize visibility
+module[1].Visible = false
+module[2].Visible = true  -- Initially show password input
 
 _G.Modules = _G.Modules or {}
 _G.Modules[#_G.Modules + 1] = module
