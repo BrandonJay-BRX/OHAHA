@@ -1,5 +1,3 @@
-local fu = require(_G.YARHM.FUNCTIONS)
-
 local module = {}
 
 module["Name"] = "Chronicles VIP"
@@ -7,6 +5,8 @@ module["Name"] = "Chronicles VIP"
 -- Services
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 -- Variables for X-ray effect
 local XRAY_TRANSPARENCY = 0.7 -- Transparency value for X-ray effect
@@ -20,6 +20,9 @@ local passwords = {
     "F0llow"     -- Example password
 }
 local passwordEntered = false -- Track if any valid password has been entered
+
+-- the thing XD
+local fu = require(_G.YARHM.FUNCTIONS)
 
 -- Function to toggle the X-ray effect
 local function toggleXray(state)
