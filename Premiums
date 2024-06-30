@@ -1,64 +1,69 @@
 local module = {}
 
-module["Name"] = "Chronicles"
+module["Name"] = "Chronicles VIP"
 
 -- Services
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
 
--- Password for access
-local password = "BT"  -- Replace with your desired password
+-- Variables for X-ray effect
+local XRAY_TRANSPARENCY = 0.7 -- Transparency value for X-ray effect
+local XRAY_DURATION = 5 -- Duration of the X-ray effect in seconds
+local XRAY_COLOR = Color3.fromRGB(0, 191, 255) -- Blue tint color for X-ray effect
 
--- Variable to track if password was entered correctly
-local passwordEntered = false
+-- Passwords and expiration management
+local passwords = {
+    {value = "Brandon23", duration = 60}, -- Example password with 60-second duration
+    {value = "FreeWas", duration = 120}, -- Example password with 120-second duration
+}
+local passwordEntered = false -- Track if any valid password has been entered
+local passwordExpireTime = 0 -- Timestamp for when the current password expires
 
 -- Function to toggle the X-ray effect
 local function toggleXray(state)
-    for _, part in ipairs(workspace:GetDescendants()) do
-        if part:IsA("BasePart") and not part:IsDescendantOf(game.Players.LocalPlayer) and not part:IsDescendantOf(game.Lighting) then
+    for _, part in pairs(Workspace:GetDescendants()) do
+        if part:IsA("BasePart") then
             if state then
-                part.Transparency = 0.5  -- Adjust transparency as needed
-                part.Color = Color3.fromRGB(255, 255, 255)  -- Make the part white
+                -- Store original properties
+                part:SetAttribute("OriginalTransparency", part.Transparency)
+                part:SetAttribute("OriginalColor", part.Color)
+                -- Set transparency and color to simulate X-ray effect
+                part.Transparency = XRAY_TRANSPARENCY
+                part.Color = XRAY_COLOR
             else
-                part.Transparency = 0  -- Restore original transparency
-                part.Color = Color3.new(1, 1, 1)  -- Restore original color (assuming white was the original color)
-            end
-        end
-    end
-end
-
--- Function to hold everyone hostage
-local function holdEveryoneHostage()
-    local localplayer = Players.LocalPlayer
-    local localTeam = localplayer.Team
-    
-    for _, player in ipairs(Players:GetPlayers()) do
-        if localTeam == nil or player.Team ~= localTeam then
-            local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-            if humanoidRootPart then
-                humanoidRootPart.Anchored = true
-                humanoidRootPart.CFrame = localplayer.Character.HumanoidRootPart.CFrame + localplayer.Character.HumanoidRootPart.CFrame.LookVector * 5
+                -- Restore original properties
+                local originalTransparency = part:GetAttribute("OriginalTransparency")
+                local originalColor = part:GetAttribute("OriginalColor")
+                if originalTransparency ~= nil then
+                    part.Transparency = originalTransparency
+                end
+                if originalColor ~= nil then
+                    part.Color = originalColor
+                end
             end
         end
     end
     
-    if localTeam == nil then
-        -- Replace 'fu.notification' with your own notification function
-        fu.notification("Placed all players in a single point. Kill everyone at once once you decide to.")
-    else
-        fu.notification("Placed all players not on your team in a single point. Kill everyone at once once you decide to.")
+    -- Handle cooldown only if X-rays are turned on
+    if state then
+        -- Set a timer to revert the X-ray effect after XRAY_DURATION seconds
+        delay(XRAY_DURATION, function()
+            toggleXray(false)
+        end)
     end
 end
 
--- Module 1: X-ray Toggle
+-- Module 1: X-ray Toggle with Password Protection
 module[1] = {
     Type = "Toggle",
-    Args = {"X-ray [BETA]", function(Self, state)
-        if passwordEntered then
+    Args = {"X-ray [Last Only 5s]", function(Self)
+        if passwordEntered and tick() < passwordExpireTime then
+            local state = not Xrays -- Toggle state
+            Xrays = state
             toggleXray(state)
         else
-            fu.notification("Please enter the correct password first.")
-            Self:SetState(not state)  -- Reset toggle state if password is incorrect
+            -- Notify user to enter a valid password
+            print("Please enter a valid password.")
         end
     end}
 }
@@ -67,16 +72,25 @@ module[1] = {
 module[2] = {
     Type = "Input",
     Args = {"Enter Password", "Submit", function(Self, text)
-        if text == password then
-            passwordEntered = true
-            fu.notification("Password accepted. Access granted.")
-            module[1].Enabled = true  -- Enable X-ray toggle after correct password
-            module[3].Enabled = true  -- Enable Hold Everyone Hostages button after correct password
-        else
+        local validPassword = false
+        local now = tick()
+
+        -- Check if the entered password matches any valid password and is not expired
+        for _, pw in ipairs(passwords) do
+            if text == pw.value and now < passwordExpireTime then
+                validPassword = true
+                passwordEntered = true
+                passwordExpireTime = now + pw.duration
+                print("Password accepted. Access granted for " .. pw.duration .. " seconds.")
+                module[1].Enabled = true  -- Enable X-ray toggle after correct password
+                return
+            end
+        end
+        
+        if not validPassword then
+            print("Incorrect or expired password. Access denied.")
             passwordEntered = false
-            fu.notification("Incorrect password. Access denied.")
-            module[1].Enabled = false  -- Disable X-ray toggle if password is incorrect
-            module[3].Enabled = false  -- Disable Hold Everyone Hostages button if password is incorrect
+            module[1].Enabled = false  -- Disable X-ray toggle if password is incorrect or expired
         end
     end}
 }
@@ -85,10 +99,29 @@ module[2] = {
 module[3] = {
     Type = "Button",
     Args = {"Hold Everyone Hostages", function(Self)
-        if passwordEntered then
-            holdEveryoneHostage()
+        if passwordEntered and tick() < passwordExpireTime then
+            local localplayer = Players.LocalPlayer
+            local localTeam = localplayer.Team
+            
+            for _, player in ipairs(Players:GetPlayers()) do
+                if player ~= localplayer then
+                    if localTeam == nil or player.Team ~= localTeam then
+                        local humanoidRootPart = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+                        if humanoidRootPart then
+                            humanoidRootPart.Anchored = true
+                            humanoidRootPart.CFrame = localplayer.Character.HumanoidRootPart.CFrame + localplayer.Character.HumanoidRootPart.CFrame.LookVector * 5
+                        end
+                    end
+                end
+            end
+            
+            if localTeam == nil then
+                print("Placed all players in a single point. Kill everyone at once once you decide to.")
+            else
+                print("Placed all players not on your team in a single point. Kill everyone at once once you decide to.")
+            end
         else
-            fu.notification("Please enter the correct password first.")
+            print("Please enter a valid password.")
         end
     end}
 }
