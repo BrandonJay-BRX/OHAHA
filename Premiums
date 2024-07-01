@@ -59,7 +59,7 @@ end
 workspace.ChildAdded:Connect(function(ch)
     if ch:FindFirstChild("RareEffect") then
         -- Notify that a rare egg has been detected
-        fu.notification("Rare egg detected with RareEffect...")
+        print("Rare egg detected with RareEffect...")
 
         -- Ensure the rare egg has loaded completely
         repeat
@@ -88,7 +88,7 @@ workspace.ChildAdded:Connect(function(ch)
         end
 
         -- Notify that the Rare Egg ESP has been applied
-        fu.notification("Rare Egg ESP applied.")
+        print("Rare Egg ESP applied.")
         end)
     end
 end
@@ -105,9 +105,9 @@ module[7] = {
                         i:Destroy()
                     end
                 end
-                fu.notification("Rare Egg ESP disabled.")
+                print("Rare Egg ESP disabled.")
             else
-                fu.notification("Rare Egg ESP enabled.")
+                print("Rare Egg ESP enabled.")
 
                 workspace.ChildAdded:Connect(function(ch)
                     if ch:FindFirstChild("RareEffect") then
