@@ -6,6 +6,7 @@ module["Name"] = "Chronicles VIP"
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
 -- Variables for X-ray effect
 local XRAY_TRANSPARENCY = 0.7 -- Transparency value for X-ray effect
@@ -15,14 +16,43 @@ local XRAY_COLOR = Color3.fromRGB(0, 191, 255) -- Blue tint color for X-ray effe
 -- Passwords management
 local passwords = {
     "Brandon23", -- Example password
-    "XD",        -- Example password
+    "XD",      -- Example password
     "F0llow"     -- Example password
 }
 local passwordEntered = false -- Track if any valid password has been entered
 
--- Variable to control avoiding player with knife
-local AvoidKnifePlayer = false
-local AvoidKnifePlayerEnabled = false -- Track if automatic avoidance is enabled
+-- List of rare eggs
+local rareEggs = {
+    "TechEgg",
+    "JDEgg",
+    "OfficeEgg",
+    "NikEgg",
+    "HospitalEgg",
+    "NukeEgg",
+    "PurpleEgg",
+    "MarbleEgg",
+    "ZyleakEgg",
+    "BankEgg",
+    "BioEgg",
+    "FragileEgg"
+}
+
+-- Function to teleport the player to a rare egg
+local function teleportToRareEgg(eggName, player)
+    for _, egg in pairs(game.Workspace.RareEggs:GetChildren()) do
+        if egg.Name == eggName then
+            -- Teleport the player to the egg's location
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                character.HumanoidRootPart.CFrame = egg.CFrame
+                print("Teleported to egg:", eggName)
+            end
+            return true
+        end
+    end
+    print("Egg not found:", eggName)
+    return false
+end
 
 -- Function to toggle the X-ray effect
 local function toggleXray(state)
@@ -55,63 +85,6 @@ local function toggleXray(state)
         delay(XRAY_DURATION, function()
             toggleXray(false)
         end)
-    end
-end
-
--- Function to find the farthest player without a knife and gun
-local function findFarthestPlayerWithoutKnifeAndGun()
-    local localPlayer = Players.LocalPlayer
-    local localCharacter = localPlayer.Character
-    
-    if not localCharacter then
-        return
-    end
-    
-    local localPosition = localCharacter.HumanoidRootPart.Position
-    local farthestDistance = 0
-    local targetPlayer = nil
-    
-    for _, player in ipairs(Players:GetPlayers()) do
-        if player ~= localPlayer then
-            local playerCharacter = player.Character
-            if playerCharacter then
-                local humanoid = playerCharacter.Humanoid
-                if humanoid and humanoid.Health > 0 then
-                    local distance = (playerCharacter.HumanoidRootPart.Position - localPosition).magnitude
-                    if distance <= 75 and not playerCharacter:FindFirstChild("Knife") and not playerCharacter:FindFirstChild("Gun") then
-                        if distance > farthestDistance then
-                            farthestDistance = distance
-                            targetPlayer = player
-                        end
-                    end
-                end
-            end
-        end
-    end
-    
-    return targetPlayer
-end
-
--- Function to handle teleportation
-local function teleportPlayerTo(targetPosition)
-    local localCharacter = Players.LocalPlayer.Character
-    if localCharacter then
-        local humanoidRootPart = localCharacter.HumanoidRootPart
-        local originalPosition = humanoidRootPart.Position
-        humanoidRootPart.CFrame = CFrame.new(targetPosition)
-        delay(5, function()
-            humanoidRootPart.CFrame = CFrame.new(originalPosition)
-        end)
-    end
-end
-
--- Function to periodically check for a player to avoid
-local function checkPlayerToAvoid()
-    if AvoidKnifePlayerEnabled then
-        local targetPlayer = findFarthestPlayerWithoutKnifeAndGun()
-        if targetPlayer then
-            teleportPlayerTo(targetPlayer.Character.HumanoidRootPart.Position)
-        end
     end
 end
 
@@ -186,33 +159,22 @@ module[3] = {
     end}
 }
 
--- Module 4: Automatically Avoid a Player with a Knife Toggle
+-- Module 5: Information Text
 module[4] = {
-    Type = "Toggle",
-    Args = {"Automatically Avoid a Player with a Knife", function(Self)
+    Type = "Text",
+    Args = {"MM2 RareEgg [Test]"}
+}
+
+-- Module 4: Collect Rare Egg Button
+module[5] = {
+    Type = "Button",
+    Args = {"Collect Rare Egg", function(Self)
         if passwordEntered then
-            AvoidKnifePlayerEnabled = not AvoidKnifePlayerEnabled -- Toggle state
-            
-            if AvoidKnifePlayerEnabled then
-                -- Immediately check for a player to avoid when turned on
-                checkPlayerToAvoid()
-                
-                -- Set up a periodic check every 2 seconds
-                local connection
-                connection = RunService.Stepped:Connect(function()
-                    checkPlayerToAvoid()
-                end)
-                
-                -- Clean up connection when toggled off
-                module[4].Cleanup = function()
-                    connection:Disconnect()
-                end
-            else
-                -- Disconnect any existing connections when turned off
-                if module[4].Cleanup then
-                    module[4].Cleanup()
-                    module[4].Cleanup = nil
-                end
+            local localPlayer = Players.LocalPlayer
+            local eggName = rareEggs[math.random(#rareEggs)]
+            local eggFound = teleportToRareEgg(eggName, localPlayer)
+            if not eggFound then
+                print("No rare egg found to collect.")
             end
         else
             print("Please enter a valid password.")
@@ -221,7 +183,7 @@ module[4] = {
 }
 
 -- Module 5: Information Text
-module[5] = {
+module[6] = {
     Type = "Text",
     Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
 }
@@ -229,7 +191,7 @@ module[5] = {
 -- Initialize Modules as disabled
 module[1].Enabled = false
 module[3].Enabled = false
-module[4].Enabled = false
+module[5].Enabled = false
 
 -- Add modules to global modules list
 _G.Modules = _G.Modules or {}
