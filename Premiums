@@ -127,12 +127,12 @@ module[3] = {
 }
 
 -- Module 5: Information Text
-module[5] = {
+module[4] = {
     Type = "Text",
     Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
 }
 
-module[6] = {
+module[5] = {
     Type = "Button",
     Args = {"Get Rare Egg [TEST]", function(Self)
         local function getPlayerCharacter()
