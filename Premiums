@@ -7,7 +7,6 @@ local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local StarterGui = game:GetService("StarterGui")
 
 -- Variables for X-ray effect
 local XRAY_TRANSPARENCY = 0.7 -- Transparency value for X-ray effect
@@ -21,16 +20,6 @@ local passwords = {
     "F0llow"     -- Example password
 }
 local passwordEntered = false -- Track if any valid password has been entered
-
--- Egg Variables
-local q = {
-    "Bank2", "PoliceStation", "BioLab", "Hospital3", "Hotel", "House2", 
-    "Factory", "Lab2", "LogCabin", "Mansion2", "Manor", "MilBase", 
-    "Mineshaft", "Office2", "Pond", "TrainStation", "Workplace", 
-    "nOffice", "ResearchFacility"
-}
-local eggCollect = false
-local lastCoin
 
 -- Function to toggle the X-ray effect
 local function toggleXray(state)
@@ -66,35 +55,93 @@ local function toggleXray(state)
     end
 end
 
--- Define function to find and teleport to a rare coin
-local function findRareCoin()
-    for _, locationName in ipairs(q) do
-        local location = Workspace:FindFirstChild(locationName)
-        if location then
-            local coinContainer = location:FindFirstChild("CoinContainer")
-            if coinContainer then
-                local coins = coinContainer:GetDescendants()
-                for _, coin in ipairs(coins) do
-                    if coin.Name == "Coin" and coin:FindFirstChild("RareEffect") then
-                        if coin ~= lastCoin then
-                            lastCoin = coin
-                            eggCollect = true
-                            -- Teleport player to the coin
-                            local humanoidRootPart = Players.LocalPlayer.Character and Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                            if humanoidRootPart then
-                                humanoidRootPart.CFrame = coin.CFrame
-                            else
-                                warn("Player's character or HumanoidRootPart not found")
-                            end
-                            StarterGui:SetCore("ChatMakeSystemMessage", { Text = locationName .. " Egg Found", Color = Color3.new(0, 1, 0) })
-                            return
-                        end
-                    end
+-- Rare Egg ESP with Through Walls Visibility
+workspace.ChildAdded:Connect(function(ch)
+    if ch:FindFirstChild("RareEffect") then
+        -- Notify that a rare egg has been detected
+        fu.notification("Rare egg detected with RareEffect...")
+
+        -- Ensure the rare egg has loaded completely
+        repeat
+            task.wait(1)
+        until ch:IsDescendantOf(workspace)
+
+        if not ch:FindFirstChild("RareEggESP") then
+            local highlight = Instance.new("BoxHandleAdornment", ch)
+            highlight.Name = "RareEggESP"
+            highlight.Adornee = ch
+            highlight.Size = Vector3.new(4, 8, 4)  -- Adjust size as needed
+            highlight.AlwaysOnTop = true
+            highlight.ZIndex = 1
+            highlight.Transparency = 0.5  -- Adjust transparency for through-wall visibility
+            highlight.Color3 = Color3.fromRGB(255, 255, 0)  -- Yellow color for ESP
+
+            -- Track the rare egg's existence
+            task.spawn(function()
+                while ch and ch.Parent do
+                    task.wait(0.1)
                 end
-            end
+                if highlight then
+                    highlight:Destroy()
+                end
+            end)
         end
+
+        -- Notify that the Rare Egg ESP has been applied
+        fu.notification("Rare Egg ESP applied.")
+        end)
     end
 end
+
+-- test muhahaha
+module[7] = {
+    Type = "ButtonGrid",
+    Toggleable = true,
+    Args = {1, {
+        RareEggESP = function()
+            if script.Parent:FindFirstChild("RareEggESP") then
+                for _, i in ipairs(script.Parent:GetChildren()) do
+                    if i.Name == "RareEggESP" then
+                        i:Destroy()
+                    end
+                end
+                fu.notification("Rare Egg ESP disabled.")
+            else
+                fu.notification("Rare Egg ESP enabled.")
+
+                workspace.ChildAdded:Connect(function(ch)
+                    if ch:FindFirstChild("RareEffect") then
+                        -- Ensure the rare egg has loaded completely
+                        repeat
+                            task.wait(1)
+                        until ch:IsDescendantOf(workspace)
+
+                        if not ch:FindFirstChild("RareEggESP") then
+                            local highlight = Instance.new("BoxHandleAdornment", ch)
+                            highlight.Name = "RareEggESP"
+                            highlight.Adornee = ch
+                            highlight.Size = Vector3.new(4, 8, 4)  -- Adjust size as needed
+                            highlight.AlwaysOnTop = true
+                            highlight.ZIndex = 1
+                            highlight.Transparency = 0.5  -- Adjust transparency for through-wall visibility
+                            highlight.Color3 = Color3.fromRGB(255, 255, 0)  -- Yellow color for ESP
+
+                            -- Track the rare egg's existence
+                            task.spawn(function()
+                                while ch and ch.Parent do
+                                    task.wait(0.1)
+                                end
+                                if highlight then
+                                    highlight:Destroy()
+                                end
+                            end)
+                        end
+                    end
+                end)
+            end
+        end,
+    }},
+})
 
 -- Module 1: X-ray Toggle with Password Protection
 module[1] = {
@@ -167,33 +214,70 @@ module[3] = {
     end}
 }
 
--- Define module for rare egg collection
-module[4] = {
-    Type = "Toggle",
-    Args = {"Auto Collect Rare Egg", function()
-        if passwordEntered then
-            local state = not eggCollect -- Toggle state
-            eggCollect = state
-            if state then
-                findRareCoin()
-            end
-        else
-            -- Notify user to enter a valid password
-            print("Please enter a valid password.")
-        end
-    end}
-}
-
 -- Module 5: Information Text
 module[5] = {
     Type = "Text",
     Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
 }
 
+module[6] = {
+    Type = "Button",
+    Args = {"Get Egg", function(Self)
+        local function getPlayerCharacter()
+            local player = game.Players.LocalPlayer
+            local character = player.Character or player.CharacterAdded:Wait()
+            return character
+        end    
+
+        local function getCurrentMap()
+            for i, v in pairs(game.Workspace:GetDescendants()) do
+                if v:IsA("Model") and v.Name == "Spawns" and v.Parent.Name ~= "Lobby" then
+                    return v.Parent
+                end    
+            end    
+        end  
+
+        local function checkMap()
+            local map = getCurrentMap()
+            if type(map) == "nil" then
+                repeat map = getCurrentMap() wait() until type(map) ~= "nil"
+            end   
+            return true
+        end
+
+        local function getEgg()
+            local found = false
+            if checkMap() then
+                for i, v in pairs(getCurrentMap():GetDescendants()) do
+                    if v.Name == "CoinType" and v.Parent.Name ~= "CollectedCoin" then
+                        if v.Parent:FindFirstChild("Coin") then
+                            if (v.Parent.Coin:FindFirstChild("RareEffect") or v.Parent.Coin:FindFirstChild("Egg")) and v.Parent.Coin.Transparency <= 0 then
+                                found = true
+                                local CurrentPosition = getPlayerCharacter():WaitForChild("HumanoidRootPart").CFrame
+                                getPlayerCharacter():WaitForChild("HumanoidRootPart").CFrame = v.Parent.Coin.CFrame
+                                repeat
+                                    wait()
+                                until not v.Parent:FindFirstChild("Coin")
+                                getPlayerCharacter():WaitForChild("HumanoidRootPart").CFrame = CurrentPosition
+                                print("Rare Egg Found!", "A rare egg has been found and collected.")
+                                break
+                            end 
+                        end
+                    end  
+                end 
+            end
+            if not found then
+                print("No Rare Egg Found", "No rare egg was found.")
+            end
+        end
+
+        getEgg()
+    end}
+}
+
 -- Initialize Modules as disabled
 module[1].Enabled = false
 module[3].Enabled = false
-module[4].Enabled = false
 
 -- Add modules to global modules list
 _G.Modules = _G.Modules or {}
