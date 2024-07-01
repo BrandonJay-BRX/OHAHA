@@ -5,6 +5,7 @@ module["Name"] = "Chronicles VIP"
 -- Services
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
@@ -37,20 +38,22 @@ local rareEggs = {
     "FragileEgg"
 }
 
--- Function to teleport the player to a rare egg
-local function teleportToRareEgg(eggName, player)
-    for _, egg in pairs(game.Workspace.RareEggs:GetChildren()) do
-        if egg.Name == eggName then
-            -- Teleport the player to the egg's location
+-- Function to find a rare egg and teleport the player if found
+local function teleportToRareEgg(player)
+    local rareEggsFolder = ReplicatedStorage:FindFirstChild("RareEggs")
+    if rareEggsFolder then
+        local eggs = rareEggsFolder:GetChildren()
+        if #eggs > 0 then
+            local randomEgg = eggs[math.random(1, #eggs)]
             local character = player.Character
             if character and character:FindFirstChild("HumanoidRootPart") then
-                character.HumanoidRootPart.CFrame = egg.CFrame
-                print("Teleported to egg:", eggName)
+                character.HumanoidRootPart.CFrame = randomEgg.CFrame
+                print("Teleported to egg:", randomEgg.Name)
+                return true
             end
-            return true
         end
     end
-    print("Egg not found:", eggName)
+    print("No rare egg found to collect.")
     return false
 end
 
@@ -171,8 +174,7 @@ module[5] = {
     Args = {"Collect Rare Egg", function(Self)
         if passwordEntered then
             local localPlayer = Players.LocalPlayer
-            local eggName = rareEggs[math.random(#rareEggs)]
-            local eggFound = teleportToRareEgg(eggName, localPlayer)
+            local eggFound = teleportToRareEgg(localPlayer)
             if not eggFound then
                 print("No rare egg found to collect.")
             end
@@ -182,7 +184,7 @@ module[5] = {
     end}
 }
 
--- Module 5: Information Text
+-- Module 6: Information Text
 module[6] = {
     Type = "Text",
     Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
