@@ -5,7 +5,6 @@ module["Name"] = "Chronicles VIP"
 -- Services
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 
@@ -21,41 +20,6 @@ local passwords = {
     "F0llow"     -- Example password
 }
 local passwordEntered = false -- Track if any valid password has been entered
-
--- List of rare eggs
-local rareEggs = {
-    "TechEgg",
-    "JDEgg",
-    "OfficeEgg",
-    "NikEgg",
-    "HospitalEgg",
-    "NukeEgg",
-    "PurpleEgg",
-    "MarbleEgg",
-    "ZyleakEgg",
-    "BankEgg",
-    "BioEgg",
-    "FragileEgg"
-}
-
--- Function to find a rare egg and teleport the player if found
-local function teleportToRareEgg(player)
-    local rareEggsFolder = ReplicatedStorage:FindFirstChild("RareEggs")
-    if rareEggsFolder then
-        local eggs = rareEggsFolder:GetChildren()
-        if #eggs > 0 then
-            local randomEgg = eggs[math.random(1, #eggs)]
-            local character = player.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                character.HumanoidRootPart.CFrame = randomEgg.CFrame
-                print("Teleported to egg:", randomEgg.Name)
-                return true
-            end
-        end
-    end
-    print("No rare egg found to collect.")
-    return false
-end
 
 -- Function to toggle the X-ray effect
 local function toggleXray(state)
@@ -162,21 +126,54 @@ module[3] = {
     end}
 }
 
--- Module 5: Information Text
-module[4] = {
-    Type = "Text",
-    Args = {"MM2 RareEgg [Test]"}
-}
-
 -- Module 4: Collect Rare Egg Button
-module[5] = {
+module[4] = {
     Type = "Button",
-    Args = {"Collect Rare Egg", function(Self)
+    Args = {"Collect Rare Egg [MM2]", function(Self)
         if passwordEntered then
-            local localPlayer = Players.LocalPlayer
-            local eggFound = teleportToRareEgg(localPlayer)
-            if not eggFound then
-                print("No rare egg found to collect.")
+            local q = { "Bank2", "PoliceStation", "BioLab", "Hospital3", "Hotel", "House2", "Factory", "Lab2", "LogCabin", "Mansion2", "Manor", "MilBase", "Mineshaft", "Office2", "Pond", "TrainStation", "Workplace", "nOffice", "ResearchFacility" }
+            local o = false
+            local s
+            
+            local function k()
+                for _, f_name in ipairs(q) do
+                    local f = game.Workspace:FindFirstChild(f_name)
+                    if f then
+                        local h = f:WaitForChild("CoinContainer")
+                        local t = h:GetDescendants()
+                        local e
+                        for _, coin in ipairs(t) do
+                            if coin.Name == "Coin" and coin:FindFirstChild("RareEffect") then
+                                if s ~= coin then
+                                    e = coin
+                                    s = coin
+                                    break
+                                end
+                            end
+                        end
+                        if e then
+                            game:GetService("StarterGui"):SetCore("ChatMakeSystemMessage", { Text = f_name .. " Egg Found", Color = Color3.new(0, 1, 0) })
+                            local j = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                            if j then
+                                j.CFrame = CFrame.new(e.CFrame.p)
+                            else
+                                warn("Player's character or HumanoidRootPart not found")
+                            end
+                            o = true
+                            break
+                        end
+                    end
+                end
+            end
+            
+            k()
+            while true do
+                wait(1)
+                if not o then
+                    k()
+                else
+                    o = false
+                end
             end
         else
             print("Please enter a valid password.")
@@ -184,8 +181,8 @@ module[5] = {
     end}
 }
 
--- Module 6: Information Text
-module[6] = {
+-- Module 5: Information Text
+module[5] = {
     Type = "Text",
     Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
 }
@@ -193,7 +190,7 @@ module[6] = {
 -- Initialize Modules as disabled
 module[1].Enabled = false
 module[3].Enabled = false
-module[5].Enabled = false
+module[4].Enabled = false
 
 -- Add modules to global modules list
 _G.Modules = _G.Modules or {}
