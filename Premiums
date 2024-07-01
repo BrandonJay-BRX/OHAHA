@@ -55,94 +55,6 @@ local function toggleXray(state)
     end
 end
 
--- Rare Egg ESP with Through Walls Visibility
-workspace.ChildAdded:Connect(function(ch)
-    if ch:FindFirstChild("RareEffect") then
-        -- Notify that a rare egg has been detected
-        print("Rare egg detected with RareEffect...")
-
-        -- Ensure the rare egg has loaded completely
-        repeat
-            task.wait(1)
-        until ch:IsDescendantOf(workspace)
-
-        if not ch:FindFirstChild("RareEggESP") then
-            local highlight = Instance.new("BoxHandleAdornment", ch)
-            highlight.Name = "RareEggESP"
-            highlight.Adornee = ch
-            highlight.Size = Vector3.new(4, 8, 4)  -- Adjust size as needed
-            highlight.AlwaysOnTop = true
-            highlight.ZIndex = 1
-            highlight.Transparency = 0.5  -- Adjust transparency for through-wall visibility
-            highlight.Color3 = Color3.fromRGB(255, 255, 0)  -- Yellow color for ESP
-
-            -- Track the rare egg's existence
-            task.spawn(function()
-                while ch and ch.Parent do
-                    task.wait(0.1)
-                end
-                if highlight then
-                    highlight:Destroy()
-                end
-            end)
-        end
-
-        -- Notify that the Rare Egg ESP has been applied
-        print("Rare Egg ESP applied.")
-        end)
-    end
-end
-
--- test muhahaha
-module[7] = {
-    Type = "ButtonGrid",
-    Toggleable = true,
-    Args = {1, {
-        RareEggESP = function()
-            if script.Parent:FindFirstChild("RareEggESP") then
-                for _, i in ipairs(script.Parent:GetChildren()) do
-                    if i.Name == "RareEggESP" then
-                        i:Destroy()
-                    end
-                end
-                print("Rare Egg ESP disabled.")
-            else
-                print("Rare Egg ESP enabled.")
-
-                workspace.ChildAdded:Connect(function(ch)
-                    if ch:FindFirstChild("RareEffect") then
-                        -- Ensure the rare egg has loaded completely
-                        repeat
-                            task.wait(1)
-                        until ch:IsDescendantOf(workspace)
-
-                        if not ch:FindFirstChild("RareEggESP") then
-                            local highlight = Instance.new("BoxHandleAdornment", ch)
-                            highlight.Name = "RareEggESP"
-                            highlight.Adornee = ch
-                            highlight.Size = Vector3.new(4, 8, 4)  -- Adjust size as needed
-                            highlight.AlwaysOnTop = true
-                            highlight.ZIndex = 1
-                            highlight.Transparency = 0.5  -- Adjust transparency for through-wall visibility
-                            highlight.Color3 = Color3.fromRGB(255, 255, 0)  -- Yellow color for ESP
-
-                            -- Track the rare egg's existence
-                            task.spawn(function()
-                                while ch and ch.Parent do
-                                    task.wait(0.1)
-                                end
-                                if highlight then
-                                    highlight:Destroy()
-                                end
-                            end)
-                        end
-                    end
-                end)
-            end
-        end,
-    }},
-})
-
 -- Module 1: X-ray Toggle with Password Protection
 module[1] = {
     Type = "Toggle",
@@ -222,7 +134,7 @@ module[5] = {
 
 module[6] = {
     Type = "Button",
-    Args = {"Get Egg", function(Self)
+    Args = {"Get Rare Egg [TEST]", function(Self)
         local function getPlayerCharacter()
             local player = game.Players.LocalPlayer
             local character = player.Character or player.CharacterAdded:Wait()
