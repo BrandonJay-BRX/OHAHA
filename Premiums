@@ -166,13 +166,16 @@ module[5] = {
                 return
             end
             
-            if aimlock then return end
-            if aimlockrscon then aimlockrscon:Disconnect() end
+            if aimlockrscon then
+                aimlockrscon:Disconnect()
+                aimlockrscon = nil -- Clear the connection variable
+            end
             
             aimlockrscon = RunService.RenderStepped:Connect(function()
                 if not target or not target.Character or not target.Character:FindFirstChild("HumanoidRootPart") then 
                     print("No valid target.")
                     aimlockrscon:Disconnect()
+                    aimlockrscon = nil -- Clear the connection variable
                     return
                 end
                 cam.CFrame = CFrame.new(cam.CFrame.Position, target.Character:FindFirstChild("HumanoidRootPart").Position)
@@ -192,6 +195,7 @@ module[6] = {
         if passwordEntered then
             if aimlockrscon then
                 aimlockrscon:Disconnect()
+                aimlockrscon = nil -- Clear the connection variable
             end
             aimlock = false
             print("Aim lock is now off.")
