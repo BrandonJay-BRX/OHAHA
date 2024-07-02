@@ -129,62 +129,61 @@ module[3] = {
 -- Module 5: Information Text
 module[4] = {
     Type = "Text",
-    Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
+    Args = {"MM2 Aim Lock | Good For Gun."}
 }
+
+local aimlock = false
+local aimlockrscon = nil
+local cam = workspace.CurrentCamera
 
 module[5] = {
     Type = "Button",
-    Args = {"Get Rare Egg [TEST]", function(Self)
-        local function getPlayerCharacter()
-            local player = game.Players.LocalPlayer
-            local character = player.Character or player.CharacterAdded:Wait()
-            return character
-        end    
-
-        local function getCurrentMap()
-            for i, v in pairs(game.Workspace:GetDescendants()) do
-                if v:IsA("Model") and v.Name == "Spawns" and v.Parent.Name ~= "Lobby" then
-                    return v.Parent
-                end    
-            end    
-        end  
-
-        local function checkMap()
-            local map = getCurrentMap()
-            if type(map) == "nil" then
-                repeat map = getCurrentMap() wait() until type(map) ~= "nil"
-            end   
-            return true
-        end
-
-        local function getEgg()
-            local found = false
-            if checkMap() then
-                for i, v in pairs(getCurrentMap():GetDescendants()) do
-                    if v.Name == "CoinType" and v.Parent.Name ~= "CollectedCoin" then
-                        if v.Parent:FindFirstChild("Coin") then
-                            if (v.Parent.Coin:FindFirstChild("RareEffect") or v.Parent.Coin:FindFirstChild("Egg")) and v.Parent.Coin.Transparency <= 0 then
-                                found = true
-                                local CurrentPosition = getPlayerCharacter():WaitForChild("HumanoidRootPart").CFrame
-                                getPlayerCharacter():WaitForChild("HumanoidRootPart").CFrame = v.Parent.Coin.CFrame
-                                repeat
-                                    wait()
-                                until not v.Parent:FindFirstChild("Coin")
-                                getPlayerCharacter():WaitForChild("HumanoidRootPart").CFrame = CurrentPosition
-                                print("Rare Egg Found!", "A rare egg has been found and collected.")
-                                break
-                            end 
-                        end
-                    end  
-                end 
-            end
-            if not found then
-                print("No Rare Egg Found", "No rare egg was found.")
+    Args = {"Aim lock", function(Self)
+        if aimlock then return end
+        if aimlockrscon then aimlockrscon:Disconnect() end
+        
+        local targetPlayer = nil
+        
+        for _, player in ipairs(Players:GetPlayers()) do
+            if player ~= Players.LocalPlayer and player.Backpack and player.Backpack:FindFirstChild("Knife") then
+                targetPlayer = player
+                break
             end
         end
-
-        getEgg()
+        
+        if not targetPlayer then
+            fu.notification("No player found with a Knife in their backpack.")
+            return
+        end
+        
+        aimlockrscon = rs.RenderStepped:Connect(function()
+            if not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                fu.notification("Target player is not valid.")
+                aimlockrscon:Disconnect()
+                return
+            end
+            cam.CFrame = CFrame.new(cam.CFrame.Position, targetPlayer.Character:FindFirstChild("HumanoidRootPart").Position)
+        end)
+        
+        aimlock = true
+        fu.notification("Aim lock is now on.")
     end}
+}
+
+module[6] = {
+    Type = "Button",
+    Args = {"Unaim lock", function(Self)
+        if not aimlock then return end
+        aimlock = false
+        if aimlockrscon then aimlockrscon:Disconnect() end
+        fu.notification("Aim lock is now off.")
+    end}
+}
+
+-- Module 5: Information Text
+module[7] = {
+    Type = "Text",
+    Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
 }
 
 -- Initialize Modules as disabled
