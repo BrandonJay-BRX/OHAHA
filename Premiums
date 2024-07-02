@@ -190,10 +190,10 @@ module[6] = {
     Type = "Button",
     Args = {"Unaim lock", function(Self)
         if passwordEntered then
-            local aimlock = false
-            if not aimlock then return end
+            if aimlockrscon then
+                aimlockrscon:Disconnect()
+            end
             aimlock = false
-            if aimlockrscon then aimlockrscon:Disconnect() end
             print("Aim lock is now off.")
         else
             print("Please enter a valid password.")
