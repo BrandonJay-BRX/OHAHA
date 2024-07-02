@@ -141,7 +141,7 @@ module[4] = {
 -- Module 5: Aim Lock Player with Knife
 module[5] = {
     Type = "Button",
-    Args = {"Aim Lock Player with Knife [5S]", function(Self)
+    Args = {"Aim Lock Player with Knife [5s Delay]", function(Self)
         if passwordEntered then
             local function getTargetPlayer()
                 local localPlayer = Players.LocalPlayer
@@ -155,9 +155,6 @@ module[5] = {
                 return nil
             end
 
-            local aimlockrscon
-            local cam = Workspace.CurrentCamera
-
             local target = getTargetPlayer()
             
             if not target then
@@ -165,34 +162,62 @@ module[5] = {
                 return
             end
             
-            -- Ensure existing connection is disconnected before starting a new one
-            if aimlockrscon then
-                aimlockrscon:Disconnect()
-                aimlockrscon = nil
+            local aimlockrscon
+            local cam = Workspace.CurrentCamera
+            local aimlockActive = false
+            local aimlockDelayActive = false -- Track if delay is active
+            
+            -- Function to predict target position
+            local function predictTargetPosition()
+                if not target or not target.Character or not target.Character:FindFirstChild("HumanoidRootPart") then
+                    return nil
+                end
+                
+                local targetPosition = target.Character.HumanoidRootPart.Position
+                local velocity = target.Character.HumanoidRootPart.Velocity
+                local timeToHit = (targetPosition - cam.CFrame.Position).Magnitude / 100 -- Assuming projectile speed of 100 studs/sec
+                
+                return targetPosition + velocity * timeToHit
             end
             
-            aimlockrscon = RunService.RenderStepped:Connect(function()
-                if not target or not target.Character or not target.Character:FindFirstChild("HumanoidRootPart") then 
-                    print("No valid target.")
-                    if aimlockrscon then
-                        aimlockrscon:Disconnect()
-                        aimlockrscon = nil
-                    end
+            -- Function to start aim lock
+            local function startAimLock()
+                if aimlockActive or aimlockDelayActive then
                     return
                 end
-                cam.CFrame = CFrame.new(cam.CFrame.Position, target.Character:FindFirstChild("HumanoidRootPart").Position)
-            end)
+                
+                aimlockActive = true
+                
+                aimlockrscon = RunService.RenderStepped:Connect(function()
+                    local predictedPosition = predictTargetPosition()
+                    if predictedPosition then
+                        cam.CFrame = CFrame.new(cam.CFrame.Position, predictedPosition)
+                    end
+                end)
+                
+                print("Aim lock is now on the player with a Knife.")
+            end
             
-            -- Automatically disconnect after 5 seconds
-            delay(5, function()
+            -- Function to stop aim lock
+            local function stopAimLock()
                 if aimlockrscon then
                     aimlockrscon:Disconnect()
                     aimlockrscon = nil
                 end
-                print("Aim lock has been automatically disabled.")
+                aimlockActive = false
+                print("Aim lock has been disabled.")
+            end
+            
+            -- Start aim lock
+            startAimLock()
+            
+            -- Automatically disable after 5 seconds
+            aimlockDelayActive = true
+            delay(5, function()
+                stopAimLock()
+                aimlockDelayActive = false
             end)
             
-            print("Aim lock is now on the player with a Knife.")
         else
             print("Please enter a valid password.")
         end
