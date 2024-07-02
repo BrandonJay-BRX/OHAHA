@@ -141,7 +141,7 @@ module[4] = {
 -- Module 5: Aim Lock Player with Knife
 module[5] = {
     Type = "Button",
-    Args = {"Aim Lock Player with Knife", function(Self)
+    Args = {"Aim Lock Player with Knife [5S]", function(Self)
         if passwordEntered then
             local function getTargetPlayer()
                 local localPlayer = Players.LocalPlayer
@@ -156,7 +156,6 @@ module[5] = {
             end
 
             local aimlockrscon
-            local aimlock = false
             local cam = Workspace.CurrentCamera
 
             local target = getTargetPlayer()
@@ -166,39 +165,34 @@ module[5] = {
                 return
             end
             
+            -- Ensure existing connection is disconnected before starting a new one
             if aimlockrscon then
                 aimlockrscon:Disconnect()
-                aimlockrscon = nil -- Clear the connection variable
+                aimlockrscon = nil
             end
             
             aimlockrscon = RunService.RenderStepped:Connect(function()
                 if not target or not target.Character or not target.Character:FindFirstChild("HumanoidRootPart") then 
                     print("No valid target.")
-                    aimlockrscon:Disconnect()
-                    aimlockrscon = nil -- Clear the connection variable
+                    if aimlockrscon then
+                        aimlockrscon:Disconnect()
+                        aimlockrscon = nil
+                    end
                     return
                 end
                 cam.CFrame = CFrame.new(cam.CFrame.Position, target.Character:FindFirstChild("HumanoidRootPart").Position)
             end)
-            aimlock = true
+            
+            -- Automatically disconnect after 5 seconds
+            delay(5, function()
+                if aimlockrscon then
+                    aimlockrscon:Disconnect()
+                    aimlockrscon = nil
+                end
+                print("Aim lock has been automatically disabled.")
+            end)
+            
             print("Aim lock is now on the player with a Knife.")
-        else
-            print("Please enter a valid password.")
-        end
-    end}
-}
-
--- Module 6: Unaim Lock
-module[6] = {
-    Type = "Button",
-    Args = {"Unaim lock", function(Self)
-        if passwordEntered then
-            if aimlockrscon then
-                aimlockrscon:Disconnect()
-                aimlockrscon = nil -- Clear the connection variable
-            end
-            aimlock = false
-            print("Aim lock is now off.")
         else
             print("Please enter a valid password.")
         end
@@ -209,7 +203,6 @@ module[6] = {
 module[1].Enabled = false
 module[3].Enabled = false
 module[5].Enabled = false
-module[6].Enabled = false
 
 -- Add modules to global modules list
 _G.Modules = _G.Modules or {}
