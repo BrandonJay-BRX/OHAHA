@@ -83,8 +83,9 @@ module[2] = {
                 passwordEntered = true
                 print("Password accepted. Access granted.")
                 module[1].Enabled = true  -- Enable X-ray toggle after correct password
-                module[4].Enabled = true  -- Enable Aim Lock after correct password
-                module[5].Enabled = true  -- Enable Unaim Lock after correct password
+                module[3].Enabled = true  -- Enable Hold Everyone Hostages after correct password
+                module[5].Enabled = true  -- Enable Aim Lock Player with Knife after correct password
+                module[6].Enabled = true  -- Enable Unaim Lock after correct password
                 return
             end
         end
@@ -93,8 +94,9 @@ module[2] = {
             print("Incorrect password. Access denied.")
             passwordEntered = false
             module[1].Enabled = false  -- Disable X-ray toggle if password is incorrect
-            module[4].Enabled = false  -- Disable Aim Lock if password is incorrect
-            module[5].Enabled = false  -- Disable Unaim Lock if password is incorrect
+            module[3].Enabled = false  -- Disable Hold Everyone Hostages if password is incorrect
+            module[5].Enabled = false  -- Disable Aim Lock Player with Knife if password is incorrect
+            module[6].Enabled = false  -- Disable Unaim Lock if password is incorrect
         end
     end}
 }
@@ -130,74 +132,80 @@ module[3] = {
     end}
 }
 
--- Module 4: Aim Lock
-local aimlock = false
-local aimlockrscon = nil
-local cam = workspace.CurrentCamera
-
+-- Module 4: Information Text
 module[4] = {
-    Type = "Button",
-    Args = {"Aim lock", function(Self)
-        if aimlock then return end
-        if aimlockrscon then aimlockrscon:Disconnect() end
-        
-        if not passwordEntered then
-            print("Please enter a valid password.")
-            return
-        end
-        
-        local targetPlayer = nil
-        
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player ~= Players.LocalPlayer and player.Backpack and player.Backpack:FindFirstChild("Knife") then
-                targetPlayer = player
-                break
-            end
-        end
-        
-        if not targetPlayer then
-            print("No player found with a Knife in their backpack.")
-            return
-        end
-        
-        aimlockrscon = RunService.RenderStepped:Connect(function()
-            if not targetPlayer.Character or not targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                print("Target player is not valid.")
-                aimlockrscon:Disconnect()
-                return
-            end
-            cam.CFrame = CFrame.new(cam.CFrame.Position, targetPlayer.Character:FindFirstChild("HumanoidRootPart").Position)
-        end)
-        
-        aimlock = true
-        print("Aim lock is now on.")
-    end}
-}
-
--- Module 5: Unaim Lock
-module[5] = {
-    Type = "Button",
-    Args = {"Unaim lock", function(Self)
-        if not aimlock then return end
-        aimlock = false
-        if aimlockrscon then
-            aimlockrscon:Disconnect()
-        end
-        print("Aim lock is now off.")
-    end}
-}
-
--- Module 6: Information Text
-module[6] = {
     Type = "Text",
     Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
+}
+
+-- Module 5: Aim Lock Player with Knife
+module[5] = {
+    Type = "Button",
+    Args = {"Aim Lock Player with Knife", function(Self)
+        if passwordEntered then
+            local function getTargetPlayer()
+                local localPlayer = Players.LocalPlayer
+                for _, player in ipairs(Players:GetPlayers()) do
+                    if player ~= localPlayer and player:FindFirstChild("Backpack") then
+                        if player.Backpack:FindFirstChild("Knife") then
+                            return player
+                        end
+                    end
+                end
+                return nil
+            end
+
+            local aimlockrscon
+            local aimlock = false
+            local cam = Workspace.CurrentCamera
+
+            local target = getTargetPlayer()
+            
+            if not target then
+                print("No player with a Knife found.")
+                return
+            end
+            
+            if aimlock then return end
+            if aimlockrscon then aimlockrscon:Disconnect() end
+            
+            aimlockrscon = RunService.RenderStepped:Connect(function()
+                if not target or not target.Character or not target.Character:FindFirstChild("HumanoidRootPart") then 
+                    print("No valid target.")
+                    aimlockrscon:Disconnect()
+                    return
+                end
+                cam.CFrame = CFrame.new(cam.CFrame.Position, target.Character:FindFirstChild("HumanoidRootPart").Position)
+            end)
+            aimlock = true
+            print("Aim lock is now on the player with a Knife.")
+        else
+            print("Please enter a valid password.")
+        end
+    end}
+}
+
+-- Module 6: Unaim Lock
+module[6] = {
+    Type = "Button",
+    Args = {"Unaim lock", function(Self)
+        if passwordEntered then
+            local aimlock = false
+            if not aimlock then return end
+            aimlock = false
+            if aimlockrscon then aimlockrscon:Disconnect() end
+            print("Aim lock is now off.")
+        else
+            print("Please enter a valid password.")
+        end
+    end}
 }
 
 -- Initialize Modules as disabled
 module[1].Enabled = false
 module[3].Enabled = false
-module[4].Enabled = false
 module[5].Enabled = false
+module[6].Enabled = false
 
 -- Add modules to global modules list
 _G.Modules = _G.Modules or {}
