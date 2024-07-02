@@ -18,6 +18,11 @@ local passwords = {
     "Brandon23", -- Example password
     "XD",      -- Example password
     "F0llow"     -- Example password
+    "1x21q", -- Example password
+    "28aqk3",      -- Example password
+    "iak21j6"     -- Example password"Brandon23", -- Example password
+    "skdm291",      -- Example password
+    "jsk21"     -- Example password
 }
 local passwordEntered = false -- Track if any valid password has been entered
 
@@ -141,7 +146,7 @@ module[4] = {
 -- Module 5: Aim Lock Player with Knife
 module[5] = {
     Type = "Button",
-    Args = {"Aim Lock Player with Knife [5s Delay]", function(Self)
+    Args = {"Aim Lock Player with Knife [BETA]", function(Self)
         if passwordEntered then
             local function getTargetPlayer()
                 local localPlayer = Players.LocalPlayer
@@ -167,19 +172,6 @@ module[5] = {
             local aimlockActive = false
             local aimlockDelayActive = false -- Track if delay is active
             
-            -- Function to predict target position
-            local function predictTargetPosition()
-                if not target or not target.Character or not target.Character:FindFirstChild("HumanoidRootPart") then
-                    return nil
-                end
-                
-                local targetPosition = target.Character.HumanoidRootPart.Position
-                local velocity = target.Character.HumanoidRootPart.Velocity
-                local timeToHit = (targetPosition - cam.CFrame.Position).Magnitude / 100 -- Assuming projectile speed of 100 studs/sec
-                
-                return targetPosition + velocity * timeToHit
-            end
-            
             -- Function to start aim lock
             local function startAimLock()
                 if aimlockActive or aimlockDelayActive then
@@ -189,10 +181,12 @@ module[5] = {
                 aimlockActive = true
                 
                 aimlockrscon = RunService.RenderStepped:Connect(function()
-                    local predictedPosition = predictTargetPosition()
-                    if predictedPosition then
-                        cam.CFrame = CFrame.new(cam.CFrame.Position, predictedPosition)
+                    if not target or not target.Character or not target.Character:FindFirstChild("HumanoidRootPart") then 
+                        stopAimLock()
+                        print("No valid target.")
+                        return
                     end
+                    cam.CFrame = CFrame.new(cam.CFrame.Position, target.Character:FindFirstChild("HumanoidRootPart").Position)
                 end)
                 
                 print("Aim lock is now on the player with a Knife.")
