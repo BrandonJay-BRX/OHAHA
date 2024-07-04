@@ -15,7 +15,14 @@ local XRAY_COLOR = Color3.fromRGB(0, 191, 255) -- Blue tint color for X-ray effe
 
 -- Passwords management
 local passwords = {
-    "Brandon23", "XD", "F0llow", "1x21q", "28aqk3", "iak21j6", "skdm291", "jsk21"
+    "Brandon23", -- Example password
+    "XD",      -- Example password
+    "F0llow"     -- Example password
+    "1x21q", -- Example password
+    "28aqk3",      -- Example password
+    "iak21j6"     -- Example password"Brandon23", -- Example password
+    "skdm291",      -- Example password
+    "jsk21"     -- Example password
 }
 local passwordEntered = false -- Track if any valid password has been entered
 
@@ -53,47 +60,6 @@ local function toggleXray(state)
     end
 end
 
--- Function to check for nearby players with a knife and teleport accordingly
-local autoAvoidEnabled = false
-local checkInterval = 3  -- Interval in seconds to check for nearby knife/murderer
-local safePosition = CFrame.new(-94.88317108154297, 138.07186889648438, 20.183759689331055)
-local originalPosition = nil
-
-local function autoAvoid()
-    local player = Players.LocalPlayer
-    local character = player.Character
-    if character and character:FindFirstChild("HumanoidRootPart") then
-        originalPosition = character.HumanoidRootPart.CFrame
-
-        for _, otherPlayer in pairs(Players:GetPlayers()) do
-            if otherPlayer ~= player then
-                local otherCharacter = otherPlayer.Character
-                if otherCharacter and otherCharacter:FindFirstChild("HumanoidRootPart") then
-                    local distance = (character.HumanoidRootPart.Position - otherCharacter.HumanoidRootPart.Position).magnitude
-                    if distance < 10 then  -- Adjust this distance threshold as needed
-                        local hasKnife = false
-                        for _, tool in pairs(otherCharacter:GetChildren()) do
-                            if tool:IsA("Tool") and tool.Name == "Knife" then
-                                hasKnife = true
-                                break
-                            end
-                        end
-
-                        if hasKnife then
-                            -- Teleport to safe position
-                            character.HumanoidRootPart.CFrame = safePosition
-                            wait(3)  -- Wait for 3 seconds
-                            -- Teleport back to original position
-                            character.HumanoidRootPart.CFrame = originalPosition
-                            return  -- Exit function after teleporting to avoid multiple teleports
-                        end
-                    end
-                end
-            end
-        end
-    end
-end
-
 -- Module 1: X-ray Toggle with Password Protection
 module[1] = {
     Type = "Toggle",
@@ -124,7 +90,7 @@ module[2] = {
                 module[1].Enabled = true  -- Enable X-ray toggle after correct password
                 module[3].Enabled = true  -- Enable Hold Everyone Hostages after correct password
                 module[5].Enabled = true  -- Enable Aim Lock Player with Knife after correct password
-                module[6].Enabled = true  -- Enable Auto Avoid Murderer/Knife after correct password
+                module[6].Enabled = true  -- Enable Unaim Lock after correct password
                 return
             end
         end
@@ -135,14 +101,7 @@ module[2] = {
             module[1].Enabled = false  -- Disable X-ray toggle if password is incorrect
             module[3].Enabled = false  -- Disable Hold Everyone Hostages if password is incorrect
             module[5].Enabled = false  -- Disable Aim Lock Player with Knife if password is incorrect
-            module[6].Enabled = false  -- Disable Auto Avoid Murderer/Knife if password is incorrect
-            
-            -- Change the input prompt to "Incorrect Password" and revert after 1 second
-            local originalPrompt = module[2].Args[1]
-            module[2].Args[1] = "Incorrect Password"
-            delay(1, function()
-                module[2].Args[1] = originalPrompt
-            end)
+            module[6].Enabled = false  -- Disable Unaim Lock if password is incorrect
         end
     end}
 }
@@ -259,27 +218,28 @@ module[5] = {
     end}
 }
 
--- Module 6: Auto Avoid Murderer/Knife
+-- Module 5: Teleport and Return
 module[6] = {
-    Type = "Toggle",
-    Args = {"Auto Avoid Murderer/Knife", function(Self)
+    Type = "Button",
+    Args = {"Avoid Murderer By Teleporting To Lobby", function(Self)
         if passwordEntered then
-            autoAvoidEnabled = not autoAvoidEnabled
-            if autoAvoidEnabled then
-                print("Auto Avoid Murderer/Knife is now enabled.")
-                while autoAvoidEnabled do
-                    autoAvoid()
-                    wait(checkInterval)
-                end
-            else
-                print("Auto Avoid Murderer/Knife is now disabled.")
-            end
+            -- Store original position
+            local originalPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+            
+            -- Teleport to specific location
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-94.88317108154297, 138.07186889648438, 20.183759689331055)
+            
+            -- Return to original position after 3 seconds
+            wait(3)
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = originalPosition
+            
+            print("Teleported and returned to original position.")
         else
             print("Please enter a valid password.")
         end
     end}
 }
-
+     
 -- Initialize Modules as disabled
 module[1].Enabled = false
 module[3].Enabled = false
@@ -291,4 +251,3 @@ _G.Modules = _G.Modules or {}
 table.insert(_G.Modules, module)
 
 return module
-
