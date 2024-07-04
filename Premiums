@@ -15,9 +15,9 @@ local XRAY_COLOR = Color3.fromRGB(0, 191, 255) -- Blue tint color for X-ray effe
 
 -- Passwords management
 local passwords = {
-    "Brandon23", -- Example password
-    "XD",      -- Example password
-    "F0llow",     -- Example password
+    "Naq", -- Example password
+    "X_D",      -- Example password
+    "Raque123",     -- Example password
     "1x21q", -- Example password
     "28aqk3",      -- Example password
     "iak21j6",     -- Example password
@@ -143,7 +143,7 @@ module[3] = {
 -- Module 4: Information Text
 module[4] = {
     Type = "Text",
-    Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
+    Args = {"<font color='#FF0000'>MM2 Features</font>"}
 }
 
 -- Module 5: Aim Lock Player with Knife
@@ -255,6 +255,12 @@ module[6] = {
             print("Please enter a valid password.")
         end
     end}
+}
+
+-- Module 4: Information Text
+module[7] = {
+    Type = "Text",
+    Args = {"Made By Brandon Jay | Tiktok: @brx12k"}
 }
 
 -- Initialize Modules as disabled
