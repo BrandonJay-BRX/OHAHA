@@ -26,6 +26,9 @@ local passwords = {
 }
 local passwordEntered = false -- Track if any valid password has been entered
 
+-- Store original position before teleportation
+local originalPosition = nil
+
 -- Function to toggle the X-ray effect
 local function toggleXray(state)
     for _, part in pairs(Workspace:GetDescendants()) do
@@ -231,7 +234,7 @@ module[6] = {
             local character = Players.LocalPlayer.Character
             if character and character.PrimaryPart then
                 -- Store original position before teleporting
-                local originalPosition = character.PrimaryPart.CFrame
+                originalPosition = character.PrimaryPart.CFrame
                 
                 -- Teleport to lobby
                 character:SetPrimaryPartCFrame(targetCFrame)
