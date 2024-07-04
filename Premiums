@@ -218,16 +218,16 @@ module[5] = {
     end}
 }
 
--- Module 5: Teleport and Return
 module[6] = {
     Type = "Button",
     Args = {"Avoid Murderer By Teleporting To Lobby", function(Self)
+        -- Check if the player has entered a password (assuming `passwordEntered` is defined elsewhere)
         if passwordEntered then
             -- Store original position
             local originalPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
             
             -- Teleport to specific location
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-94.88317108154297, 138.07186889648438, 20.183759689331055)
+            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-94.88317108154297, 138.07186889648438, 20.183759689331055) -- Adjust coordinates as needed
             
             -- Return to original position after 3 seconds
             wait(3)
@@ -235,7 +235,7 @@ module[6] = {
             
             print("Teleported and returned to original position.")
         else
-            print("Please enter a valid password.")
+            print("Please enter a valid password.")  -- Notify if password is not entered
         end
     end}
 }
