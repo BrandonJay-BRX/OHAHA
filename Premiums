@@ -1,3 +1,6 @@
+-- Define the original position before teleportation
+local originalPosition = nil
+
 local module = {}
 
 module["Name"] = "Chronicles VIP"
@@ -17,10 +20,10 @@ local XRAY_COLOR = Color3.fromRGB(0, 191, 255) -- Blue tint color for X-ray effe
 local passwords = {
     "Brandon23", -- Example password
     "XD",      -- Example password
-    "F0llow"     -- Example password
+    "F0llow",     -- Example password
     "1x21q", -- Example password
     "28aqk3",      -- Example password
-    "iak21j6"     -- Example password"Brandon23", -- Example password
+    "iak21j6",     -- Example password
     "skdm291",      -- Example password
     "jsk21"     -- Example password
 }
@@ -148,6 +151,7 @@ module[5] = {
     Type = "Button",
     Args = {"Aim Lock Player with Knife [BETA]", function(Self)
         if passwordEntered then
+            -- Define the target player with a knife (modify as per your game's logic)
             local function getTargetPlayer()
                 local localPlayer = Players.LocalPlayer
                 for _, player in ipairs(Players:GetPlayers()) do
@@ -218,28 +222,46 @@ module[5] = {
     end}
 }
 
+-- Module 5: Teleport to Lobby
 module[6] = {
     Type = "Button",
-    Args = {"Avoid Murderer By Teleporting To Lobby", function(Self)
-        -- Check if the player has entered a password (assuming `passwordEntered` is defined elsewhere)
+    Args = {"Avoid Murderer By Teleporting to Lobby", function(Self)
         if passwordEntered then
-            -- Store original position
-            local originalPosition = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+            -- Define the target CFrame position to teleport to
+            local targetCFrame = CFrame.new(Vector3.new(-94.88317108154297, 138.07186889648438, 20.183759689331055))
             
-            -- Teleport to specific location
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(-94.88317108154297, 138.07186889648438, 20.183759689331055) -- Adjust coordinates as needed
+            -- Function to teleport to lobby
+            local function teleportToLobby()
+                local character = Players.LocalPlayer.Character
+                if character then
+                    -- Store original position before teleporting
+                    originalPosition = character.PrimaryPart.CFrame
+
+                    -- Teleport to lobby
+                    character:SetPrimaryPartCFrame(targetCFrame)
+                    print("Teleported to lobby.")
+                    
+                    -- Automatically return to original position after 3 seconds
+                    delay(3, function()
+                        if originalPosition then
+                            character:SetPrimaryPartCFrame(originalPosition)
+                            print("Returned to original position.")
+                        end
+                    end)
+                else
+                    print("Error: LocalPlayer's character not found.")
+                end
+            end
             
-            -- Return to original position after 3 seconds
-            wait(3)
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = originalPosition
+            -- Teleport to lobby when the button is clicked
+            teleportToLobby()
             
-            print("Teleported and returned to original position.")
         else
-            print("Please enter a valid password.")  -- Notify if password is not entered
+            print("Please enter a valid password.")
         end
     end}
 }
-     
+
 -- Initialize Modules as disabled
 module[1].Enabled = false
 module[3].Enabled = false
