@@ -284,6 +284,7 @@ module[6] = {
 module[1].Enabled = false
 module[3].Enabled = false
 module[5].Enabled = false
+module[6].Enabled = false
 
 -- Add modules to global modules list
 _G.Modules = _G.Modules or {}
